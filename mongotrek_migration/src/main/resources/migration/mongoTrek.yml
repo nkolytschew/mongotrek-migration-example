@@ -1,0 +1,225 @@
+migrations:
+    - version: 1.0.0
+      description: initialization - populate user base data
+      author: admin
+      command: {
+        insert: "user",
+        documents: [
+            { email: "test-1@test-email.de", username: "test-1-awesome", password: "test-1",
+                surname: "test-1", name: "1-awesome" },
+            { email: "test-2@test-email.de", username: "test-2-awesome", password: "test-2",
+                surname: "test-2", name: "2-awesome" },
+            { email: "test-3@test-email.de", username: "test-3-awesome", password: "test-3",
+                surname: "test-3", name: "3-awesome" },
+            { email: "test-4@test-email.de", username: "test-4-awesome", password: "test-4",
+                surname: "test-4", name: "4-awesome" },
+            { email: "test-5@test-email.de", username: "test-5-awesome", password: "test-5",
+                surname: "test-5", name: "5-awesome" }
+        ]
+      }
+    - version: 2.0.0
+      description: update user - add creation date - update many
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: {},
+                u: {$currentDate: {"creationDate": { $type: "date" }}},
+                multi: true
+            }
+        ]
+      }
+    - version: 3.0.0
+      description: update user - add modification date - update many
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: {},
+                u: {
+                    $currentDate: {"modificationDate": { $type: "date" }},
+                    $set: {"version" : 1}
+                },
+                multi: true
+            }
+        ]
+      }
+    - version: 4.0.0
+      description: update user - add address and update modification date and version - update many
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: {"email": "test-1@test-email.de"},
+                u: {
+                    $set: {
+                        "address": [
+                            {city: "Hamburger City", street: "Random Muster Straße 0", zip: "05678"},
+                            {city: "Hamburger City", street: "Random Muster Straße 1", zip: "15678"},
+                            {city: "Hamburger City", street: "Random Muster Straße 2", zip: "25678"}
+                        ]
+                    },
+                    $currentDate: {"modificationDate": true},
+                    $inc: {"version" : 1}
+                },
+                multi: true
+            }
+        ]
+      }
+    - version: 5.0.0
+      description: create user - create default user without email
+      author: admin
+      command: {
+        insert: "user",
+        documents: [
+            { username: "awesome-1-test", password: "awesome-1",
+                surname: "1-test", name: "awesome-1", version: 0,
+#                creationDate: Date.now(),
+                address: [
+                            {city: "Musterstadt", street: "Muster Random Straße 0", zip: "05678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 1", zip: "15678"}
+                        ]
+                },
+            { username: "awesome-2-test", password: "awesome-2",
+                surname: "2-test", name: "awesome-2", version: 0,
+#                creationDate: Date.now(),
+                address: [
+                            {city: "Musterstadt", street: "Muster Random Straße 0", zip: "05678"}
+                        ]
+            },
+            { username: "awesome-3-test", password: "awesome-3",
+                surname: "3-test", name: "awesome-3", version: 0,
+#                creationDate: Date.now(),
+                address: [
+                            {city: "Musterstadt", street: "Muster Random Straße 0", zip: "05678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 1", zip: "15678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 2", zip: "25678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 3", zip: "35678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 4", zip: "45678"}
+                        ]
+            },
+            { username: "awesome-4-test", password: "awesome-4",
+                surname: "4-test", name: "awesome-4", version: 0,
+#                creationDate: Date.now(),
+                address: [
+                            {city: "Musterstadt", street: "Muster Random Straße 0", zip: "05678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 1", zip: "15678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 2", zip: "25678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 3", zip: "35678"}
+                        ]
+            },
+            { username: "awesome-5-test", password: "awesome-5",
+                surname: "5-test", name: "awesome-5", version: 0,
+#                creationDate: Date.now(),
+                address: [
+                            {city: "Musterstadt", street: "Muster Random Straße 0", zip: "05678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 1", zip: "15678"},
+                            {city: "Musterstadt", street: "Muster Random Straße 2", zip: "25678"}
+                        ]
+            }
+        ]
+      }
+    - version: 5.0.1
+      description: update all user with empty cDates - add creation date - update many
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: { creationDate : "Date.now()"},
+                u: {
+                    $currentDate: {
+                        "creationDate": { $type: "date" },
+                        "modificationDate": { $type: "date"}
+                    },
+                    $inc: { version: 1 }
+                },
+                multi: true
+            }
+        ]
+      }
+    - version: 6.0.0
+      description: update all user - change email from string to type Email and update with existing email - step 1 rename
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: { email: { $exists: true } },
+                u: {
+                    $currentDate: {
+                        modificationDate: true ,
+                    },
+                    $rename: { "email": "oldEmail" },
+                    $inc: { version: 1 }
+                },
+                multi: true
+            }
+        ]
+      }
+    - version: 6.0.1
+      description: update all user - change email from string to type Email and update with existing email - step 2 rename
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: { oldEmail: { $exists: true } },
+                u: {
+                    $currentDate: {
+                        modificationDate: true ,
+                        "email.creationDate": { $type: "date" }
+                    },
+                    $rename: { "oldEmail": "email.email" },
+                    $inc: { version: 1 }
+                },
+                multi: true
+            }
+        ]
+      }
+    - version: 6.1.0
+      description: update all user - change email from string to type Email if no email exists
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: { email: null },
+                u: {
+                    $currentDate: {
+                        modificationDate: true ,
+                        "email.creationDate": { $type: "date" }
+                    },
+                    $set: { "email.email": "" },
+                    $inc: { version: 1 }
+                },
+                multi: true
+            }
+        ]
+      }
+#    - version: 7.0.0
+#      description: concatinating of fields currently not supported
+#      author: admin
+    - version: 8.0.0
+      description: update all user - add createdBy and modifedBy fields
+      author: admin
+      command: {
+        update: "user",
+        updates: [
+            {
+                q: { },
+                u: {
+                    $currentDate: { modificationDate: true },
+                    $set: {
+                        createdBy: "admin",
+                        modifiedBy: "admin"
+                    },
+                    $inc: { version: 1                                    }
+                },
+                multi: true
+            }
+        ]
+      }
